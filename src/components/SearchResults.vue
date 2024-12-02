@@ -1,11 +1,11 @@
 <template>
-    <h1 class="text-center my-2" v-text="$route.query.search_query" />
+    <h1 class="my-2 text-center" v-text="$route.query.search_query" />
 
     <label for="ddlSearchFilters">
         <strong v-text="`${$t('actions.filter')}:`" />
     </label>
     <select id="ddlSearchFilters" v-model="selectedFilter" default="all" class="select w-auto" @change="updateFilter()">
-        <option v-for="filter in availableFilters" :key="filter" :value="filter" v-t="`search.${filter}`" />
+        <option v-for="filter in availableFilters" :key="filter" v-t="`search.${filter}`" :value="filter" />
     </select>
 
     <hr />
@@ -18,45 +18,21 @@
         </i18n-t>
     </div>
 
-    <div v-if="results" class="video-grid">
+    <LoadingIndicatorPage :show-content="results != null && results.items?.length" class="video-grid">
         <template v-for="result in results.items" :key="result.url">
-            <VideoItem v-if="shouldUseVideoItem(result)" :video="result" height="94" width="168" />
-            <div v-if="!shouldUseVideoItem(result)">
-                <router-link :to="result.url">
-                    <div class="relative">
-                        <img class="w-full" :src="result.thumbnail" loading="lazy" />
-                    </div>
-                    <p>
-                        <span v-text="result.name" />
-                        <font-awesome-icon class="ml-1.5" v-if="result.verified" icon="check" />
-                    </p>
-                </router-link>
-                <p v-if="result.description" v-text="result.description" />
-                <router-link v-if="result.uploaderUrl" class="link" :to="result.uploaderUrl">
-                    <p>
-                        <span v-text="result.uploader" />
-                        <font-awesome-icon class="ml-1.5" v-if="result.uploaderVerified" icon="check" />
-                    </p>
-                </router-link>
-
-                <a v-if="result.uploaderName" class="link" v-text="result.uploaderName" />
-                <template v-if="result.videos >= 0">
-                    <br v-if="result.uploaderName" />
-                    <strong v-text="`${result.videos} ${$t('video.videos')}`" />
-                </template>
-
-                <br />
-            </div>
+            <ContentItem :item="result" height="94" width="168" />
         </template>
-    </div>
+    </LoadingIndicatorPage>
 </template>
 
 <script>
-import VideoItem from "./VideoItem.vue";
+import ContentItem from "./ContentItem.vue";
+import LoadingIndicatorPage from "./LoadingIndicatorPage.vue";
 
 export default {
     components: {
-        VideoItem,
+        ContentItem,
+        LoadingIndicatorPage,
     },
     data() {
         return {
@@ -70,6 +46,7 @@ export default {
                 "music_videos",
                 "music_albums",
                 "music_playlists",
+                "music_artists",
             ],
             selectedFilter: this.$route.query.filter ?? "all",
         };
@@ -77,6 +54,12 @@ export default {
     mounted() {
         if (this.handleRedirect()) return;
         this.updateResults();
+        this.saveQueryToHistory();
+    },
+    updated() {
+        if (this.$route.query.search_query !== undefined) {
+            document.title = this.$route.query.search_query + " - Piped";
+        }
     },
     activated() {
         this.handleRedirect();
@@ -97,7 +80,10 @@ export default {
         },
         async updateResults() {
             document.title = this.$route.query.search_query + " - Piped";
-            this.results = this.fetchResults().then(json => (this.results = json));
+            this.results = this.fetchResults().then(json => {
+                this.results = json;
+                this.updateWatched(this.results.items);
+            });
         },
         updateFilter() {
             this.$router.replace({
@@ -123,9 +109,6 @@ export default {
                 });
             }
         },
-        shouldUseVideoItem(item) {
-            return item.title;
-        },
         handleRedirect() {
             const query = this.$route.query.search_query;
             const url =
@@ -137,6 +120,19 @@ export default {
                 this.$router.push(url);
                 return true;
             }
+        },
+        saveQueryToHistory() {
+            if (!this.getPreferenceBoolean("searchHistory", false)) return;
+            const query = this.$route.query.search_query;
+            if (!query) return;
+            const searchHistory = JSON.parse(localStorage.getItem("search_history")) ?? [];
+            if (searchHistory.includes(query)) {
+                const index = searchHistory.indexOf(query);
+                searchHistory.splice(index, 1);
+            }
+            searchHistory.unshift(query);
+            if (searchHistory.length > 10) searchHistory.shift();
+            localStorage.setItem("search_history", JSON.stringify(searchHistory));
         },
     },
 };

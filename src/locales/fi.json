@@ -59,14 +59,13 @@
         "most_recent": "Viimeisin",
         "sort_by": "Järjestä:",
         "view_subscriptions": "Näytä tilaukset",
-        "unsubscribe": "Poistu tilauksesta - {count}",
-        "subscribe": "Tilaa - {count}",
+        "unsubscribe": "Poistu tilauksesta",
+        "subscribe": "Tilaa",
         "minimize_recommendations": "Minimoi suositukset",
         "show_recommendations": "Näytä suositukset",
-        "show_replies": "Näytä vastaukset",
         "hide_replies": "Piilota vastaukset",
         "load_more_replies": "Lataa lisää vastauksia",
-        "instance_selection": "Instanssin valinta",
+        "instance_selection": "Instanssi",
         "delete_playlist_confirm": "Haluatko varmasti poistaa tämän soittolistan?",
         "please_select_playlist": "Valitse soittolista",
         "add_to_playlist": "Lisää soittolistaan",
@@ -90,7 +89,43 @@
         "skip_highlight": "Ohita kohokohta",
         "skip_filler_tangent": "Ohita epäolennainen",
         "enabled_codecs": "Käytössä olevat koodekit (useita)",
-        "show_markers": "Näytä merkit soittimessa"
+        "show_markers": "Näytä merkit soittimessa",
+        "confirm_reset_preferences": "Oletko varma, että haluat palauttaa asetukset?",
+        "back_to_home": "Takaisin kotisivuun",
+        "minimize_recommendations_default": "Minimoi suositukset oletusarvoisesti",
+        "with_timecode": "Jaa aikakoodilla",
+        "documentation": "Dokumentaatio",
+        "piped_link": "Piped-linkki",
+        "store_search_history": "Tallenna hakuhistoria",
+        "minimize_chapters_default": "Minimoi luvut oletusarvoisesti",
+        "show_watch_on_youtube": "Näytä Katso YouTubessa -painike",
+        "different_auth_instance": "Käytä eri instanssia todennukseen",
+        "download_as_txt": "Lataa .txt-tiedostona",
+        "show_chapters": "Luvut",
+        "minimize_comments": "Minimoi kommentit",
+        "minimize_comments_default": "Minimoi kommentit oletusarvoisesti",
+        "delete_account": "Poista tili",
+        "clone_playlist_success": "Onnistunut kloonaus!",
+        "reset_preferences": "Nollaa asetukset",
+        "copy_link": "Kopioi linkki",
+        "status_page": "Tila",
+        "source_code": "Lähdekoodi",
+        "instance_donations": "Instanssille lahjoitukset",
+        "no_valid_playlists": "Tiedosto ei sisällä kelvollisia soittolistoja!",
+        "share": "Jaa",
+        "reply_count": "{count} vastausta",
+        "hide_watched": "Piilota katsotut videot syötteessä",
+        "time_code": "Aikakoodi (sekunteina)",
+        "follow_link": "Avaa linkki",
+        "invalidate_session": "Kirjaudu ulos kaikista laitteista",
+        "logout": "Kirjaudu ulos tästä laitteesta",
+        "backup_preferences": "Varmuuskopiointiasetukset",
+        "restore_preferences": "Palauta asetukset",
+        "skip_automatically": "Automaattisesti",
+        "enable_dearrow": "Ota käyttöön DeArrow",
+        "instance_privacy_policy": "Tietosuojaseloste",
+        "instance_auth_selection": "Todennus instanssin valinta",
+        "instances_not_shown": "Julkiset instanssit, joita ei näytetä täällä, eivät ole saatavilla juuri nyt."
     },
     "player": {
         "watch_on": "Katso sivustolla {0}"
@@ -103,7 +138,17 @@
         "register": "Rekisteröidy",
         "login": "Kirjaudu sisään",
         "trending": "Nousussa",
-        "playlists": "Soittolistat"
+        "playlists": "Soittolistat",
+        "player": "Soitin",
+        "instance": "Instanssi",
+        "account": "Tili",
+        "channels": "Kanavat",
+        "bookmarks": "Kirjanmerkit",
+        "albums": "Albumit",
+        "dearrow": "DeArrow",
+        "channel_groups": "Kanavaryhmät",
+        "livestreams": "Livelähetykset",
+        "custom_instances": "Mukautettu instanssi"
     },
     "search": {
         "did_you_mean": "Tarkoititko: {0}?",
@@ -117,6 +162,15 @@
         "music_playlists": "YT Music: Soittolistat"
     },
     "comment": {
-        "pinned_by": "Kiinnitti"
+        "pinned_by": "Kiinnitti {author}",
+        "loading": "Ladataan kommentteja…",
+        "user_disabled": "Kommentit on poistettu käytöstä asetuksista.",
+        "disabled": "Lataaja on poistanut kommentit käytöstä."
+    },
+    "info": {
+        "page_not_found": "Sivua ei löydy",
+        "copied": "Kopioitu!",
+        "cannot_copy": "Ei voi kopioida!",
+        "local_storage": "Tämä toiminto vaatii localStorage, ovatko evästeet käytössä?"
     }
 }
