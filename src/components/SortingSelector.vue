@@ -1,12 +1,12 @@
 <template>
-    <label for="ddlSortBy" v-t="'actions.sort_by'" />
-    <select id="ddlSortBy" v-model="selectedSort" class="select w-auto">
-        <option v-for="(value, key) in options" v-t="`actions.${key}`" :key="key" :value="value" />
+    <label v-t="'actions.sort_by'" for="ddlSortBy" />
+    <select id="ddlSortBy" v-model="selectedSort" class="select flex-grow">
+        <option v-for="(value, key) in options" :key="key" v-t="`actions.${key}`" :value="value" />
     </select>
 </template>
 
 <script setup>
-import { defineEmits, defineProps, ref, watch } from "vue";
+import { ref, watch } from "vue";
 
 const options = {
     most_recent: "descending",
@@ -18,7 +18,10 @@ const options = {
 const selectedSort = ref("descending");
 
 const props = defineProps({
-    byKey: String,
+    byKey: {
+        type: String,
+        required: true,
+    },
 });
 
 const emit = defineEmits(["apply"]);

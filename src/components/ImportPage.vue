@@ -5,13 +5,15 @@
                 <input ref="fileSelector" type="file" @change="fileChange" />
             </div>
             <div>
-                <strong v-text="`Selected Subscriptions: ${selectedSubscriptions}`" />
+                <strong v-text="`${$t('info.selected_subscriptions')}: ${selectedSubscriptions}`" />
             </div>
             <div>
-                <strong>Override: <input v-model="override" class="checkbox" type="checkbox" /></strong>
+                <strong
+                    ><span v-t="'actions.override'" />: <input v-model="override" class="checkbox" type="checkbox"
+                /></strong>
             </div>
             <div>
-                <a class="btn w-auto" @click="handleImport">Import</a>
+                <a v-t="'actions.import'" class="btn w-auto" @click="handleImport" />
             </div>
         </form>
         <br />
@@ -88,10 +90,11 @@ export default {
                     });
                 }
                 // NewPipe
-                else if (text.indexOf("app_version") != -1) {
+                else if (text.indexOf("subscriptions") != -1) {
                     const json = JSON.parse(text);
                     json.subscriptions
-                        .filter(item => item.service_id == 0)
+                        // if service_id is undefined, chances are it's a freetube export
+                        .filter(item => item.service_id == 0 || item.service_id == undefined)
                         .forEach(item => {
                             const url = item.url;
                             const id = url.slice(-24);
@@ -105,10 +108,14 @@ export default {
                 }
                 // FreeTube DB
                 else if (text.indexOf("allChannels") != -1) {
-                    const json = JSON.parse(text);
-                    json.subscriptions.forEach(item => {
-                        this.subscriptions.push(item.id);
-                    });
+                    const lines = text.split("\n");
+                    for (let line of lines) {
+                        if (line === "") continue;
+                        const json = JSON.parse(line);
+                        json.subscriptions.forEach(item => {
+                            this.subscriptions.push(item.id);
+                        });
+                    }
                 }
                 // Google Takeout JSON
                 else if (text.indexOf("contentDetails") != -1) {
@@ -158,7 +165,11 @@ export default {
                 : [...new Set((this.getLocalSubscriptions() ?? []).concat(newChannels))];
             // Sort for better cache hits
             subscriptions.sort();
-            localStorage.setItem("localSubscriptions", JSON.stringify(subscriptions));
+            try {
+                localStorage.setItem("localSubscriptions", JSON.stringify(subscriptions));
+            } catch (e) {
+                alert(this.$t("info.local_storage"));
+            }
         },
     },
 };

@@ -1,59 +1,105 @@
 <template>
-    <div class="w-full min-h-screen px-1vw reset" :class="[theme]">
-        <NavBar />
-        <router-view v-slot="{ Component }">
-            <keep-alive :max="5">
-                <component :is="Component" :key="$route.fullPath" />
-            </keep-alive>
-        </router-view>
+    <div class="reset min-h-screen w-full flex flex-col px-1vw py-5 antialiased" :class="[theme]">
+        <div class="flex-1">
+            <NavBar />
+            <router-view v-slot="{ Component }">
+                <keep-alive :max="5">
+                    <component :is="Component" :key="$route.fullPath" />
+                </keep-alive>
+            </router-view>
+        </div>
 
-        <footer class="text-center my-2">
-            <a aria-label="GitHub" href="https://github.com/TeamPiped/Piped">
-                <font-awesome-icon :icon="['fab', 'github']" />
-            </a>
-            <a class="ml-2" href="https://github.com/TeamPiped/Piped#donations">
-                <font-awesome-icon :icon="['fab', 'bitcoin']" />
-                <span class="ml-1" v-t="'actions.donations'" />
-            </a>
-        </footer>
+        <FooterComponent />
     </div>
 </template>
 
 <script>
 import NavBar from "./components/NavBar.vue";
+import FooterComponent from "./components/FooterComponent.vue";
+
+const darkModePreference = window.matchMedia("(prefers-color-scheme: dark)");
+
 export default {
     components: {
         NavBar,
+        FooterComponent,
+    },
+    data() {
+        return {
+            theme: "dark",
+        };
     },
     mounted() {
-        if (this.getPreferenceBoolean("watchHistory", false))
-            if ("indexedDB" in window) {
-                const request = indexedDB.open("piped-db", 1);
-                request.onupgradeneeded = function () {
-                    const db = request.result;
-                    console.log("Upgrading object store.");
-                    if (!db.objectStoreNames.contains("watch_history")) {
-                        const store = db.createObjectStore("watch_history", { keyPath: "videoId" });
-                        store.createIndex("video_id_idx", "videoId", { unique: true });
-                        store.createIndex("id_idx", "id", { unique: true, autoIncrement: true });
+        this.setTheme();
+        darkModePreference.addEventListener("change", () => {
+            this.setTheme();
+        });
+
+        if ("indexedDB" in window) {
+            const request = indexedDB.open("piped-db", 6);
+            request.onupgradeneeded = ev => {
+                const db = request.result;
+                console.log("Upgrading object store.");
+                if (!db.objectStoreNames.contains("watch_history")) {
+                    const store = db.createObjectStore("watch_history", { keyPath: "videoId" });
+                    store.createIndex("video_id_idx", "videoId", { unique: true });
+                    store.createIndex("id_idx", "id", { unique: true, autoIncrement: true });
+                }
+                if (ev.oldVersion < 2) {
+                    const store = request.transaction.objectStore("watch_history");
+                    store.createIndex("watchedAt", "watchedAt", { unique: false });
+                }
+                if (!db.objectStoreNames.contains("playlist_bookmarks")) {
+                    const store = db.createObjectStore("playlist_bookmarks", { keyPath: "playlistId" });
+                    store.createIndex("playlist_id_idx", "playlistId", { unique: true });
+                    store.createIndex("id_idx", "id", { unique: true, autoIncrement: true });
+                }
+                if (!db.objectStoreNames.contains("channel_groups")) {
+                    const store = db.createObjectStore("channel_groups", { keyPath: "groupName" });
+                    store.createIndex("groupName", "groupName", { unique: true });
+                }
+                if (!db.objectStoreNames.contains("playlists")) {
+                    const playlistStore = db.createObjectStore("playlists", { keyPath: "playlistId" });
+                    playlistStore.createIndex("playlistId", "playlistId", { unique: true });
+                    const playlistVideosStore = db.createObjectStore("playlist_videos", { keyPath: "videoId" });
+                    playlistVideosStore.createIndex("videoId", "videoId", { unique: true });
+                }
+                // migration to fix an invalid previous length of channel ids: 11 -> 24
+                (async () => {
+                    if (ev.oldVersion < 6) {
+                        const subscriptions = await this.fetchSubscriptions();
+                        const channelGroups = await this.getChannelGroups();
+                        for (let group of channelGroups) {
+                            for (let i = 0; i < group.channels.length; i++) {
+                                const tooShortChannelId = group.channels[i];
+                                const foundChannel = subscriptions.find(
+                                    channel => channel.url.substr(-11) == tooShortChannelId,
+                                );
+                                if (foundChannel) group.channels[i] = foundChannel.url.substr(-24);
+                            }
+                            this.createOrUpdateChannelGroup(group);
+                        }
                     }
-                };
-                request.onsuccess = e => {
-                    window.db = e.target.result;
-                };
-            } else console.log("This browser doesn't support IndexedDB");
+                })();
+            };
+            request.onsuccess = e => {
+                window.db = e.target.result;
+            };
+        } else console.log("This browser doesn't support IndexedDB");
 
         const App = this;
 
         (async function () {
-            const defaultLang = await App.defaultLangage;
+            const defaultLang = await App.defaultLanguage;
             const locale = App.getPreferenceString("hl", defaultLang);
             if (locale !== App.TimeAgoConfig.locale) {
-                const localeTime = await import(
-                    "./../node_modules/javascript-time-ago/locale/" + locale + ".json"
-                ).then(module => module.default);
-                App.TimeAgo.addLocale(localeTime);
-                App.TimeAgoConfig.locale = locale;
+                const localeTime = await import(`../node_modules/javascript-time-ago/locale/${locale}.json`)
+                    .catch(() => null)
+                    .then(module => module?.default);
+                if (localeTime) {
+                    App.TimeAgo.addLocale(localeTime);
+                    App.TimeAgoConfig.locale = locale;
+                }
             }
             if (window.i18n.global.locale.value !== locale) {
                 if (!window.i18n.global.availableLocales.includes(locale)) {
@@ -63,6 +109,29 @@ export default {
                 window.i18n.global.locale.value = locale;
             }
         })();
+    },
+    methods: {
+        setTheme() {
+            let themePref = this.getPreferenceString("theme", "dark"); // dark, light or auto
+            const themes = {
+                dark: "dark",
+                light: "light",
+                auto: darkModePreference.matches ? "dark" : "light",
+            };
+
+            this.theme = themes[themePref];
+
+            this.changeTitleBarColor();
+
+            // Used for the scrollbar
+            const root = document.querySelector(":root");
+            this.theme === "dark" ? root.classList.add("dark") : root.classList.remove("dark");
+        },
+        changeTitleBarColor() {
+            const currentColor = { dark: "#0F0F0F", light: "#FFF" };
+            const themeColor = document.querySelector("meta[name='theme-color']");
+            themeColor.setAttribute("content", currentColor[this.theme]);
+        },
     },
 };
 </script>
@@ -76,8 +145,12 @@ b {
     text-align: start;
 }
 
+:root {
+    color-scheme: only light;
+}
+
 ::-webkit-scrollbar {
-    background-color: #15191a;
+    background-color: #d1d5db;
 }
 
 ::-webkit-scrollbar-thumb {
@@ -96,25 +169,48 @@ b {
     background-color: #0b0e0f;
 }
 
+:root {
+    scrollbar-color: #4b4f52 #d1d5db;
+}
+
+.dark ::-webkit-scrollbar {
+    background-color: #15191a;
+}
+
+.dark ::-webkit-scrollbar-thumb {
+    background-color: #4b4f52;
+}
+
+.dark ::-webkit-scrollbar-thumb:hover {
+    background-color: #5b6469;
+}
+
+.dark ::-webkit-scrollbar-thumb:active {
+    background-color: #485053;
+}
+
+.dark ::-webkit-scrollbar-corner {
+    background-color: #0b0e0f;
+}
+
+:root.dark {
+    scrollbar-color: #4b4f52 #15191a;
+}
+
 * {
-    scrollbar-color: #15191a #444a4e;
     @apply font-sans;
 }
 
 .video-grid {
-    @apply grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 col-auto <md:gap-x-2.5 md:gap-x-1vw gap-y-1.5;
+    @apply grid grid-cols-1 mx-2 sm:mx-0 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 col-auto lt-md:gap-x-3 md:gap-x-6 gap-y-5;
 }
 
 .btn {
-    @apply h-full py-2 <md:(px-2) md:(px-4) rounded cursor-pointer;
+    @apply py-2 lt-md:px-2 md:px-4 rounded cursor-pointer inline-block hover:bg-gray-500 hover:text-white;
 }
 
 .reset {
     @apply text-black bg-white;
-}
-
-.auto {
-    @apply dark:(text-white bg-dark-900);
 }
 
 .dark {
@@ -142,14 +238,19 @@ b {
     @apply text-gray-400 bg-dark-400;
 }
 
-.auto .input,
-.auto .select,
-.auto .btn {
-    @apply dark:(text-gray-400 bg-dark-400);
+.dark .btn {
+    @apply hover:bg-dark-300;
 }
 
 .input {
-    @apply pl-2.5;
+    @apply px-2.5 rounded-md;
+}
+
+.input:focus {
+    @apply outline-red-500;
+    outline-style: solid;
+    outline-width: 2px;
+    box-shadow: 0 0 15px rgba(239, 68, 68, 1);
 }
 
 hr {
@@ -158,10 +259,6 @@ hr {
 
 .dark hr {
     @apply border-dark-100;
-}
-
-.auto hr {
-    @apply dark:border-dark-100;
 }
 
 h1,
@@ -182,30 +279,37 @@ h2 {
 }
 
 .link {
-    @apply hover:(text-dark-300 underline underline-dark-300);
+    @apply focus:text-red-500 hover:text-red-500;
 }
 
 .link-secondary {
-    @apply hover:(text-dark-400 underline underline-dark-400);
+    @apply hover:text-dark-400 focus:text-dark-400 underline underline-dark-400;
 }
 
 .dark .link {
-    @apply hover:(text-gray-300 underline underline-gray-300);
-}
-
-.auto .link {
-    @apply dark:hover:(text-gray-300 underline underline-gray-300);
+    @apply focus:text-red-400 hover:text-red-400;
 }
 
 .dark .link-secondary {
     @apply text-gray-300 hover:(text-gray-400 underline underline-gray-400);
 }
 
-.auto .link-secondary {
-    @apply dark:(text-gray-300 hover:(text-gray-400 underline underline-gray-400));
+.line {
+    @apply px-2.5 py-0.25 my-0.45 rounded-xl bg-dark-900;
 }
 
-.line {
-    @apply px-2.5 py-0.25 my-0.45 rounded-xl bg-white;
+.dark .line {
+    @apply bg-white;
+}
+
+.thumbnail-overlay {
+    @apply rounded-md absolute bg-black text-white bg-opacity-75 px-5px;
+}
+
+.thumbnail-right {
+    @apply bottom-5px right-5px;
+}
+.thumbnail-left {
+    @apply bottom-5px left-5px text-xs font-bold bg-red-600 uppercase;
 }
 </style>

@@ -2,7 +2,8 @@
 
 [![AGPL v3](https://shields.io/badge/License-AGPL%20v3-blue.svg)](https://www.gnu.org/licenses/agpl-3.0.en.html)
 [![Matrix](https://img.shields.io/matrix/piped:matrix.org)](https://matrix.to/#/#piped:matrix.org)
-[![Registered Users](https://pipedapi.kavin.rocks/registered/badge)](https://piped.kavin.rocks/register)
+[![Lemmy](https://img.shields.io/lemmy/piped%40feddit.rocks)](https://feddit.rocks/c/piped)
+[![Registered Users](https://pipedapi.kavin.rocks/registered/badge)](https://piped.video/register)
 [![IPFS Build](https://github.com/TeamPiped/Piped/actions/workflows/ipfs-build.yml/badge.svg)](https://piped-ipfs.kavin.rocks/)
 [![GitHub Repo stars](https://img.shields.io/github/stars/TeamPiped/Piped-Frontend?style=social)](https://github.com/TeamPiped/Piped/stargazers)
 [![GitHub last commit](https://img.shields.io/github/last-commit/TeamPiped/Piped-Frontend)](https://github.com/TeamPiped/Piped/commits)
@@ -28,17 +29,18 @@ By using Piped, you can freely watch and listen to content without the fear of p
 -   [x] Login
 -   [x] Feeds
 -   [x] Playlists
--   [x] Integration with SponsorBlock
+-   [x] Integration with [SponsorBlock](https://github.com/ajayyy/SponsorBlock)
 -   [x] Integration with [LBRY](https://lbry.com/) for streaming
 -   [x] Integration with [Return YouTube Dislike](https://returnyoutubedislike.com/) via [RYD-Proxy](https://github.com/TeamPiped/RYD-Proxy)
 -   [x] 4K support
 -   [x] No connections to Google's servers
 -   [x] Playing just audio
 -   [x] PWA support
--   [x] Support for iOS
 -   [x] Locally saved Preferences
 -   [x] [Available in many languages](src/locales), thanks to [our translators](https://hosted.weblate.org/projects/piped/frontend/)
 -   [x] Embedded video support
+-   [x] No age restriction
+-   [x] Bypasses Geo restrictions if possible through a federated network
 
 **Technical Features**
 
@@ -46,38 +48,48 @@ By using Piped, you can freely watch and listen to content without the fear of p
 -   [x] Performant by design, designed to handle 1000s of users concurrently
 -   [x] Does not use official YouTube APIs
 -   [x] Uses [NewPipeExtractor](https://github.com/TeamNewPipe/NewPipeExtractor) to extract information
--   [x] Public [JSON API](https://piped-docs.kavin.rocks/docs/api-documentation/)
+-   [x] Public [JSON API](https://docs.piped.video/docs/api-documentation/)
+-   [x] Federated protocol on Matrix to let instances collaborate with each other
 
-## Screenshots
+## Having trouble?
+If you have any general questions regarding how Piped works or trouble setting up your own instance, please consult the following public chat rooms and documentation for help. Please use these platforms exclusively for such cases and do NOT open an issue.
 
-| Player                                                                                                        | Trending                                                                                                      | Channel                                                                                                       |
-| ------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------- |
-| ![Screenshot 1](https://cloudflare-ipfs.com/ipfs/bafybeiaxhsog7jzydr7xb3xhlemxilqksceqg5fraaiuojzclhocsqrcvq) | ![Screenshot 2](https://cloudflare-ipfs.com/ipfs/bafybeigafumvrgbfyufxjptvufobstrywrfv2kteyuuictfko6kvghjszu) | ![Screenshot 3](https://cloudflare-ipfs.com/ipfs/bafybeiehs5xjqmmq34gmewxoqm3j3b2ze3pve4sdmanz7ukrxwgrcmxnry) |
-
-## Public Chat Rooms
+### Public Chat Rooms/Communities
 
 -   You can join us via Matrix at [#piped](https://matrix.to/#/#piped:matrix.org).
--   You can also join us at the libera.chat IRC network which is bridged to the Matrix room at [#piped](https://web.libera.chat/#piped).
+-   You can join us on Lemmy on the [!piped@feddit.rocks](https://feddit.rocks/c/piped) community.
 
-## Self-Hosting
+### Self-Hosting
 
-See https://piped-docs.kavin.rocks/docs/self-hosting/ for more details.
+See https://docs.piped.video/docs/self-hosting/ for more details.
 
 The source code of the documentation website is available at https://github.com/TeamPiped/Documentation.
 
-## Documentation
+### Documentation
 
-The documentation can be found at https://piped-docs.kavin.rocks (accessible via IPNS as well).
+The documentation can be found at https://docs.piped.video (accessible via IPNS as well).
+
+The API specification is located at https://github.com/TeamPiped/OpenAPI.
 
 ## Extensions
 
-To redirect all YouTube links to Piped, you are highly recommended to use either [Piped-Redirects](https://github.com/TeamPiped/Piped-Redirects) or [Libredirect](https://github.com/libredirect/libredirect#readme).
+To redirect all YouTube links to Piped, you are highly recommended to use either [Piped-Redirects](https://github.com/TeamPiped/Piped-Redirects), [Libredirect](https://github.com/libredirect/libredirect) or [Predirect](https://github.com/libreom/predirect).
 
 ## Contributing
 
 ### Translations
 
 You can help by translating the project to a language you speak at https://hosted.weblate.org/projects/piped/frontend/
+
+### Mirrors
+
+-   Cloudflare Pages - [cf.piped.video](https://cf.piped.video/)
+-   Vercel - [vc.piped.video](https://vc.piped.video/)
+-   Render - [re.piped.video](https://re.piped.video/)
+-   Fleek - [fl.piped.video](https://fl.piped.video/)
+-   DigitalOcean - [do.piped.video](https://do.piped.video/)
+-   Netlify - [nf.piped.video](https://nf.piped.video/)
+-   Azure - [az.piped.video](https://az.piped.video/)
 
 ### Forking, and contributing
 
@@ -91,43 +103,63 @@ You can help by translating the project to a language you speak at https://hoste
 ### Development Setup
 
 ```
-yarn install
+pnpm install
 ```
 
 ### Compiles and hot-reloads for development
 
 ```
-yarn serve
+pnpm dev
 ```
 
 You can now make changes and view then in realtime!
 
-## Contact
-
-If you would like to contact me personally, you may do so with the following means:
-
--   Matrix: @kavin1337:matrix.org
--   Mastodon: https://mastodon.online/@kavin
--   Email: kavin@kavin.rocks
-
 ## Donations
 
-Donations can be made at:
+Donations (to Kavin) can be made at:
 
 -   bc1qhq8zjxmu405nvp37njj6zv3s980zg400pu9jfe (BTC)
 -   0x1D77D4cfB1a947514241bcf19B1F04738495e2fD (ETH)
--   8A5Up8rKgagVAz6TuUduBqHp518H1U6fYc6GqCfWsaEfjGzbSccfYpgMqp5d4oe5Ws5MuFE1iKmhQTadhMhvuk3bHRT5Ebk (XMR, aka Monero)
+-   84wyyeGTrg4U1daJufi78bAFrBQgdRhmxJZvgYv8dAFeFVwkJaBEmw5C7fNniUM9n4jfrz3NeG32Agxtp7JNAcCUFPACfwA (XMR, aka Monero)
 -   nano_1ngejzydncche4rdua3iebhj7sa95pw5geq4pb8phugtjf3tku933ktjb4pq (Nano)
 -   XpzgouDTKCUuE8a92XqjX9b43gKL8oLihw (Dash)
 
-FIAT donations can be made at: https://liberapay.com/kavin
+FIAT donations can be made at:
+
+- https://liberapay.com/kavin (Initial author)
+- https://liberapay.com/Bnyro (Project maintainer)
 
 Contributions in any other form are also welcomed.
 
 # Made with Piped
 
--   [Yattee](https://github.com/yattee/yattee) - an alternative frontend for YouTube, for IOS.
--   [LibreTube](https://github.com/Libre-tube/LibreTube) [WIP] - an alternative frontend for YouTube, for Android.
+**Mobile/desktop apps**
+-   [LibreTube](https://github.com/Libre-tube/LibreTube) - Alternative frontend for YouTube for Android.
+-   [Yattee](https://github.com/yattee/yattee) - Alternative frontend for YouTube for MacOS / iOS.
+-   [YTDLnis](https://github.com/deniscerri/ytdlnis) - Video and audio downloader for Android that uses Piped to update formats.
+-   [Pipeline](https://gitlab.com/schmiddi-on-mobile/pipeline) - Alternative frontend for YouTube for Linux.
+-   [PlasmaTube](https://apps.kde.org/plasmatube/) - Alternative frontend for YouTube for Linux.
+-   [Harmony Music](https://github.com/anandnet/Harmony-Music) - YouTube Music alternative for Android/Windows/Debian, built with Flutter that supports piped linking for playlists.
+
+
+**Web apps**
+-   [Hyperpipe](https://codeberg.org/Hyperpipe/Hyperpipe) - Alternative privacy respecting front-end for YouTube Music.
+-   [ytify](https://github.com/n-ce/ytify) - Complementary audio streaming frontend for YouTube & YouTube Music. 
+-   [Piped-Material](https://github.com/mmjee/Piped-Material) - Fork of Piped, focusing on better performance and a more usable design.
+-   [Musicale](https://github.com/Bellisario/musicale) - Alternative frontend for YouTube Music with style.
+
+
+**Not Under Active Development**
+  
+-   [PsTube](https://github.com/prateekmedia/pstube) - Watch and download videos without ads on Android, Linux, Windows, iOS, and Mac OSX.
+-   [VibeYou](https://github.com/you-apps/VibeYou) - Privacy focused music player for Android supporting playback via Piped.
+  
+-   [conduit](https://github.com/ai25/conduit) - Alternative frontend for YouTube, with a modern player and watch together capabilities.
+-   [DeskVideo](https://github.com/malisipi/DeskVideo) - Desktop styled, customizable alternative frontend for YouTube.
+-   [ReacTube](https://github.com/NeeRaj-2401/ReacTube) - Privacy friendly & distraction free YouTube frontend.
+
+-   [vidyodl](https://github.com/MrKovar/vidyodl) - Simple API to download videos from YouTube, using Piped.
+-   [Piped Addon for Kodi](https://github.com/syhlx/plugin.video.piped) - Kodi plugin for Piped.
 
 ## YourKit
 

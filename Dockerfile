@@ -2,16 +2,25 @@ FROM node:lts-alpine AS build
 
 WORKDIR /app/
 
+RUN --mount=type=cache,target=/var/cache/apk \
+    apk add --no-cache \
+    curl
+
 COPY . .
 
-RUN --mount=type=cache,target=/root/.cache/yarn \
+RUN corepack enable && corepack prepare pnpm@latest --activate
+
+RUN --mount=type=cache,target=/root/.local/share/pnpm \
     --mount=type=cache,target=/app/node_modules \
-    yarn install --prefer-offline && \
-    yarn build && sed -i 's/fonts.gstatic.com/fonts.kavin.rocks/g' dist/assets/*.css
+    pnpm install --prefer-offline && \
+    pnpm build && ./localizefonts.sh
 
-FROM nginx:alpine
+FROM nginxinc/nginx-unprivileged:alpine
 
-COPY --from=build /app/dist/ /usr/share/nginx/html/
-COPY docker/nginx.conf /etc/nginx/conf.d/default.conf
+COPY --chown=101:101 --from=build /app/dist/ /usr/share/nginx/html/
 
-EXPOSE 80
+COPY --chown=101:101 docker/nginx.conf /etc/nginx/conf.d/default.conf
+
+COPY docker/entrypoint.sh /entrypoint.sh
+
+ENTRYPOINT [ "/entrypoint.sh" ]

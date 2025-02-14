@@ -1,73 +1,76 @@
 <template>
     <!-- desktop view -->
-    <div v-if="!mobileLayout" class="flex-col overflow-y-scroll max-h-75vh min-h-64 <lg:hidden">
+    <div v-if="!mobileLayout" class="max-h-75vh max-w-35vw min-h-64 flex-col overflow-y-scroll lt-lg:hidden">
         <h2 class="mb-2 bg-gray-500/50 p-2" aria-label="chapters" title="chapters">
             {{ $t("video.chapters") }} ({{ chapters.length }})
         </h2>
         <div
-            :key="chapter.start"
             v-for="(chapter, index) in chapters"
-            @click="$emit('seek', chapter.start)"
+            :key="chapter.start"
             class="chapter-vertical"
             :class="{ 'bg-red-500/50': isCurrentChapter(index) }"
+            @click="$emit('seek', chapter.start)"
         >
             <div class="flex">
-                <span class="mt-5 mr-2 text-current" v-text="index + 1" />
-                <img :src="chapter.image" :alt="chapter.title" />
-                <div class="flex flex-col m-2">
+                <span class="mr-2 mt-5 text-current" v-text="index + 1" />
+                <img class="shrink-0" :src="chapter.image" :alt="chapter.title" />
+                <div class="m-2 flex flex-col">
                     <span class="text-sm" :title="chapter.title" v-text="chapter.title" />
-                    <span class="text-sm font-bold text-blue-500" v-text="timeFormat(chapter.start)" />
+                    <span class="text-sm text-blue-500 font-bold" v-text="timeFormat(chapter.start)" />
                 </div>
             </div>
         </div>
     </div>
-    <!-- mobile view -->
-    <div v-else class="flex overflow-x-auto">
+
+    <!-- mobile vertical view -->
+    <div
+        v-if="mobileLayout && getPreferenceString('mobileChapterLayout') == 'Vertical'"
+        class="max-h-64 flex flex-col overflow-y-scroll"
+    >
+        <h2 class="mb-2 bg-gray-500/50 p-2" aria-label="chapters" title="chapters">
+            {{ $t("video.chapters") }} ({{ chapters.length }})
+        </h2>
         <div
-            :key="chapter.start"
             v-for="(chapter, index) in chapters"
+            :key="chapter.start"
+            class="chapter-vertical"
+            :class="{ 'bg-red-500/50': isCurrentChapter(index) }"
             @click="$emit('seek', chapter.start)"
+        >
+            <div class="flex">
+                <span class="mr-2 mt-5 text-current" v-text="index + 1" />
+                <img class="shrink-0" :src="chapter.image" :alt="chapter.title" />
+                <div class="m-2 flex flex-col">
+                    <span class="text-sm" :title="chapter.title" v-text="chapter.title" />
+                    <span class="text-sm text-blue-500 font-bold" v-text="timeFormat(chapter.start)" />
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- mobile Horizontal view -->
+    <div v-if="getPreferenceString('mobileChapterLayout') == 'Horizontal' && mobileLayout" class="flex overflow-x-auto">
+        <div
+            v-for="(chapter, index) in chapters"
+            :key="chapter.start"
             class="chapter"
             :class="{ 'bg-red-500/50': isCurrentChapter(index) }"
+            @click="$emit('seek', chapter.start)"
         >
             <img :src="chapter.image" :alt="chapter.title" />
             <div class="m-1 flex">
                 <span class="text-truncate text-sm" :title="chapter.title" v-text="chapter.title" />
-                <span class="px-1 text-sm font-bold text-blue-500" v-text="timeFormat(chapter.start)" />
+                <span class="px-1 text-sm text-blue-500 font-bold" v-text="timeFormat(chapter.start)" />
             </div>
         </div>
     </div>
 </template>
 
-<style>
-::-webkit-scrollbar {
-    height: 5px;
-}
-.chapter {
-    @apply cursor-pointer self-center p-2.5;
-    img {
-        @apply w-full h-full;
-    }
-}
-.chapter-vertical {
-    @apply cursor-pointer self-center p-2.5;
-    img {
-        @apply w-3/10 h-3/10;
-    }
-}
-.chapter-vertical:hover {
-    @apply bg-gray-500;
-}
-.text-truncate {
-    @apply truncate overflow-hidden inline-block w-10em;
-}
-</style>
-
 <script setup>
-import { defineProps, defineEmits } from "vue";
-
 const props = defineProps({
-    chapters: Object,
+    chapters: {
+        type: Object,
+        default: () => null,
+    },
     mobileLayout: {
         type: Boolean,
         default: () => true,
@@ -87,3 +90,28 @@ const isCurrentChapter = index => {
 
 defineEmits(["seek"]);
 </script>
+
+<style>
+::-webkit-scrollbar {
+    height: 5px;
+}
+.chapter {
+    @apply cursor-pointer self-center p-2.5;
+}
+.chapter img {
+    @apply w-full h-full;
+}
+.chapter-vertical {
+    @apply cursor-pointer self-center p-2.5;
+}
+.chapter-vertical img {
+    @apply w-3/10 h-3/10;
+}
+
+.chapter-vertical:hover {
+    @apply bg-gray-500;
+}
+.text-truncate {
+    @apply truncate overflow-hidden inline-block w-10em;
+}
+</style>
